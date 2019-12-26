@@ -42,13 +42,19 @@ test_2.o: test_2.c $(DEPS)
 all: build-tests
 
 .PHONY: clean
-clean: clean-tests
+clean: 
+	@echo "Cleaning all *.o files"
 	rm $(OBJ)
 
 .PHONY: clean-tests
 clean-tests:
+	@echo "Cleaning tests *.o"
 	rm $(TEST_OBJ)
+	@echo "Cleaning txt files"
+	rm $(TESTDIR)/*.txt
+	@echo "Cleaning tests executable files"
+	rm $(TESTDIR)/*
 
 .PHONY: build-tests
-build-tests: test1
+build-tests: test1 test2
 
