@@ -42,9 +42,12 @@ typedef struct collection {
 	Volume *volumes;
 } Collection;
 
-/* global CURL variable for general use */
+/* global CURL para utilizacao na biblioteca */
 extern CURL *curl;
 extern CURLcode response;
+
+/* definicao do uri da api, no futuro carregar de algum ficheiro */
+extern char *api_url = "https://www.googleapis.com/books/v1/";
 
 /*
  * Faz o inicializacao global da library curl, como indicado na especificacao.
