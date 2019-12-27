@@ -110,8 +110,11 @@ int 	google_books_search_by_author(const char *apikey, const char *author,
  * Faz o encode da string de acordo com as regras definidas:
  * char '"' (aspas) altera para %22
  * char ' ' (espaco) altera para %20
+ *
+ * Devolve uma nova cadeia de texto (devemos libertar o espaco apos utilizar)
  */
-void	string_encode(char *dst, char *src);
+char*	string_encode(char *str);
+
 /*
  * Retorna nos parametros pdf_url e thumb_url, os URLs onde se pode fazer o
  * download do PDF e da imagem do livro. O livro e identificado atraves do

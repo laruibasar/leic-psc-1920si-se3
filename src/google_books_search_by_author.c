@@ -17,7 +17,7 @@ google_books_search_by_author(const char *apikey, const char *author,
 {
 	int books = 0;
 	char *uri, *encoded_uri;
-	struct json_object *json, *total_items, *items;
+	struct json_object *json, *total_items;
 	
 	/* Construir o uri de pesquisa, com base na apikey e author */
 	uri = malloc(URI_MAX_SIZE * sizeof(char));
@@ -33,12 +33,7 @@ google_books_search_by_author(const char *apikey, const char *author,
 	strcat(uri, apikey);
 
 	/* encode da string */
-	encoded_uri = malloc(URI_MAX_SIZE * sizeof(char));
-	if (encoded_uri == NULL) {
-		fprintf(stderr, "Failed to allocate memory\n");
-		return -1;
-	}
-	string_encode(encoded_uri, uri);
+	encoded_uri = string_encode(uri);
 
 	/* executar a pesquisa e guardar o resultado */
 	json = http_get_json_data(encoded_uri);
@@ -51,44 +46,50 @@ google_books_search_by_author(const char *apikey, const char *author,
 	 */
 	if (json_object_object_get_ex(json, "totalItems", &total_items)) {
 		books = json_object_get_int64(total_items);
+		free(total_items);
 	}
 
 	if (books > 0) {
-		if (json_object_object_get_ex(json, "items", &items))
+		struct json_object* items;
+		if (json_object_object_get_ex(json, "items", &items)) {
 			printf("\nmuitos books\n");
+		}
+		free(items);
 	}
 
 	/* magic envolved */
 	free(encoded_uri);
 	free(uri);
-	free(items);
-	free(total_items);
 	free(json);
 
 	return books;
 }
 
-void
-string_encode(char *dst, char *src)
+char *
+string_encode(char *str)
 {
-	char c = src[0];
-	int j = 0;
-	for (int i = 0; c != 0 && i < URI_MAX_SIZE; c = src[++i], ++j) {
-		switch (c) {
-			case '"':
-				dst[j] = '%';
-				dst[++j] = '2';
-				dst[++j] = '2';
-				break;
-			case ' ':
-				dst[j] = '%';
-				dst[++j] = '2';
-				dst[++j] = '0';
-				break;
-			default:
-				dst[j] = c;
-				break;
-		}
+	/* um ponteiro para iterar pela origen */
+	char *pstr = str;
+	
+	/* a nova cadeia e o ponteiro para iterar */
+	char *new = malloc(URI_MAX_SIZE * sizeof(char));
+	char *pnew = new;
+
+	while (*pstr) {
+		if (*pstr == '"') {
+			*pnew++ = '%';
+			*pnew++ = '2';
+			*pnew++ = '2';
+		} else if (*pstr == ' ') {
+			*pnew++ = '%';
+			*pnew++ = '2';
+			*pnew++ = '0';
+		} else 
+			*pnew++ = *pstr;
+
+		pstr++;
 	}
-	dst[j] = 0;
+	*pnew = '\0';
+
+	return new;
 }
