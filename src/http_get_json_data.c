@@ -25,12 +25,15 @@ http_get_json_data(const char *uri)
 	struct BufferResponse res;
 	enum json_tokener_error error;
 	struct json_object *json = NULL;
+	struct curl_slist *header = NULL;
 	curl = curl_easy_init();
 
 	if (curl == NULL) {
 		fprintf(stderr, "Failed to setup connection");
 		return NULL;
 	}
+
+	header = curl_slist_append(header, "Content-Type: application/json");
 	
 	/* aumentara conforme os dados recebidos */
 	res.buffer = malloc(1); 
@@ -49,6 +52,7 @@ http_get_json_data(const char *uri)
 	/* we disable SSL verification for simplicity */
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
 
 	response = curl_easy_perform(curl);
 	if (response != CURLE_OK) {
@@ -69,6 +73,7 @@ http_get_json_data(const char *uri)
 
 	free(res.buffer);
 	curl_easy_cleanup(curl);
+	curl_slist_free_all(header);
 	
 	return json;
 }
