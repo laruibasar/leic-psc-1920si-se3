@@ -14,15 +14,15 @@
 
 #include "books.h"
 
-struct MemoryStruct {
-	char *memory;
+struct BufferResponse {
+	char *buffer;
 	size_t size;
 };
 
 struct json_object *
 http_get_json_data(const char *uri)
 {
-	struct MemoryStruct chunck;
+	struct BufferResponse res;
 	enum json_tokener_error error;
 	struct json_object *json = NULL;
 	curl = curl_easy_init();
@@ -31,18 +31,20 @@ http_get_json_data(const char *uri)
 		fprintf(stderr, "Failed to setup connection");
 		return NULL;
 	}
-
-	chunck.memory = malloc(1); /* aumentara conforme os dados recebidos */
-	chunck.size = 0; /* sem dados atualmente */
-	if (chunck.memory == NULL) {
+	
+	/* aumentara conforme os dados recebidos */
+	res.buffer = malloc(1); 
+	/* sem dados atualmente */
+	res.size = 0; 
+	if (res.buffer == NULL) {
 		fprintf(stderr, "Failed to allocate memory\n");
 		return NULL;
 	}
 
 	curl_easy_setopt(curl, CURLOPT_URL, uri);
 	/* Define our callback to get called when there's data to be written */
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, wmemory);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunck);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_buffer);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&res);
 
 	/* we disable SSL verification for simplicity */
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -54,10 +56,10 @@ http_get_json_data(const char *uri)
 			curl_easy_strerror(response));
 		return NULL;
 	} else {
-		/* agora temos o chunck.memory com os dados recebidos
-		 * da api com a dimensao chunck.size
+		/* agora temos a resposta em res com os dados recebidos
+		 * da api e a sua dimensao 
 		 */
-		json = json_tokener_parse_verbose(chunck.memory, &error);
+		json = json_tokener_parse_verbose(res.buffer, &error);
 		if (error != json_tokener_success) {
 			fprintf(stderr, "Failed to parse JSON: %s\n",
 				json_tokener_error_desc(error));
@@ -65,38 +67,40 @@ http_get_json_data(const char *uri)
 		}
 	}
 
-	free(chunck.memory);
+	free(res.buffer);
 	curl_easy_cleanup(curl);
 	
 	return json;
 }
 
 size_t
-wmemory(char *ptr, size_t size, size_t nmemb, void *userdata)
+write_to_buffer(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	size_t realsize = size * nmemb;
-	/* cria um ponteiro para os dados atuais ja recebidos */
-	struct MemoryStruct *mem = (struct MemoryStruct *)userdata;
-	
-	/* define um ponteiro para uma zona de maior que permite alojar os
-	 * dados ja recebidos, e os que vao ser guardados neste novo conjunto 
-	 * recebidos.
+	/* Cria um ponteiro para os dados atuais
+	 * por receber ou ja recebidos
 	 */
-	char *ch = realloc(mem->memory, mem->size + realsize + 1);
+	struct BufferResponse *mem = (struct BufferResponse *)userdata;
+	
+	/* Define um ponteiro para uma zona de maior espaco que permite alojar
+	 * os dados ja recebidos, e os que vao ser guardados neste novo
+	 * conjunto recebidos.
+	 */
+	char *ch = realloc(mem->buffer, mem->size + realsize + 1);
 	if (ch == NULL) {
-		/* out of memory */
+		/* Out of memory */
 		fprintf(stderr, "Not enough memory for data received.\n");
 		return 0;
 	}
 
-	/* afecta o novo espaco no struct e copia o adiciona os dados
+	/* Afecta o novo espaco no struct e copia o adiciona os dados
 	 * recebidos
 	 */
-	mem->memory = ch;
-	memcpy(&(mem->memory[mem->size]), ptr, realsize);
+	mem->buffer = ch;
+	memcpy(&(mem->buffer[mem->size]), ptr, realsize);
 
 	mem->size += realsize;
-	mem->memory[mem->size] = 0;
+	mem->buffer[mem->size] = 0;
 
 	return realsize;
 }

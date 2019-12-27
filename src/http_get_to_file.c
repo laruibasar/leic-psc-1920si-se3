@@ -25,7 +25,7 @@ http_get_to_file(const char *uri, const char *filename)
 
 	curl_easy_setopt(curl, CURLOPT_URL, uri);
 	/* Define our callback to get called when there's data to be written */
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, wfile);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_file);
 
 	/* Set the filename to pass to the callback */
 	fp = fopen(filename, "w");
@@ -53,7 +53,7 @@ http_get_to_file(const char *uri, const char *filename)
 }
 
 size_t
-wfile(char *ptr, size_t size, size_t nmemb, void *userdata)
+write_to_file(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	return fwrite(ptr, size, nmemb, (FILE *)userdata);
 }

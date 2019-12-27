@@ -66,7 +66,7 @@ int	http_get_to_file(const char *uri, const char *filename);
 /*
  * Faz a escrita para o ficheiro, atraves de callback nas opcoes do curl
  */
-size_t	wfile(char *ptr, size_t size, size_t nmemb, void *userdata);
+size_t	write_to_file(char *ptr, size_t size, size_t nmemb, void *userdata);
 
 /*
  * Realiza pedido HTTP GET ao uri especificado, do tipo application/json,
@@ -77,12 +77,14 @@ struct json_object*	http_get_json_data(const char *uri);
 
 /*
  * Faz a escrita em memoria dos dados recebidos, atraves de callback.
- * Atencao que necessita de algum cuidado por os dados serem enviados
- * em chunks como indicado na documentacao da biblioteca.
+ * Atencao que necessita de algum cuidado por nao ser garantido
+ * pela libcurl dos dados serem enviados completos numa so pedido,
+ * como indicado na documentacao da biblioteca.
  *
- * Baseado no exemplo: https://curl.haxx.se/libcurl/c/getinmemory.html
+ * man 3 CURLOPT_WRITEFUNCTION
+ * https://curl.haxx.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
  */
-size_t	wmemory(char *ptr, size_t size, size_t nmemb, void *userdata);
+size_t	write_to_buffer(char *ptr, size_t size, size_t nmemb, void *userdata);
 
 /*
  * Realiza uma pesquisa por volumes com base no nome do author. No uri usado
