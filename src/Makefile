@@ -13,7 +13,7 @@ DEPS = books.h
 OBJ = books.o http_get_to_file.o http_get_json_data.o \
       google_books_search_by_author.o
 
-TEST_OBJ = test_1.o test_2.o
+TEST_OBJ = test_1.o test_2.o test_3.o
 
 CURL_CFLAGS != curl-config --cflags
 CURL_LDFLAGS != curl-config --libs
@@ -59,6 +59,14 @@ test_2.o: test_2.c $(DEPS)
 	@echo "Compiling " $<
 	$(CC) $(CFLAGS) -o $@ $<
 
+test3: test_3.o $(OBJ)
+	@echo "Linking and create executable " $@
+	$(CC) -o $(TEST_DIR)/$@ $(LDFLAGS) $(OBJ) test_3.o
+
+test_3.o: test_3.c $(DEPS)
+	@echo "Compiling " $<
+	$(CC) $(CFLAGS) -o $@ $<
+
 .PHONY: all
 all: lib tests
 
@@ -68,7 +76,7 @@ lib: $(OBJ)
 	$(CC) $(LIB_LDFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/$(LIB) $(OBJ)  
 
 .PHONY: tests
-tests: test1 test2
+tests: test1 test2 test3
 
 .PHONY: clean-all
 clean-all: clean clean-build clean-tests
