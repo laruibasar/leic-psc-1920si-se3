@@ -11,6 +11,12 @@
 #include <curl/curl.h>
 #include <json-c/json.h>
 
+/* definicao do uri da api, no futuro carregar de algum ficheiro */
+#define API_URL "https://www.googleapis.com/books/v1/"
+
+/* definicao do tamanho maximo para construcao do URI */
+#define URI_MAX_SIZE 256
+
 /*
  * Tipo de retorno possivel para utilizacao de URL
  */
@@ -46,8 +52,6 @@ typedef struct collection {
 extern CURL *curl;
 extern CURLcode response;
 
-/* definicao do uri da api, no futuro carregar de algum ficheiro */
-extern char *api_url = "https://www.googleapis.com/books/v1/";
 
 /*
  * Faz o inicializacao global da library curl, como indicado na especificacao.
@@ -102,6 +106,12 @@ size_t	write_to_buffer(char *ptr, size_t size, size_t nmemb, void *userdata);
 int 	google_books_search_by_author(const char *apikey, const char *author,
 				 Collection *res);
 
+/*
+ * Faz o encode da string de acordo com as regras definidas:
+ * char '"' (aspas) altera para %22
+ * char ' ' (espaco) altera para %20
+ */
+void	string_encode(char *dst, char *src);
 /*
  * Retorna nos parametros pdf_url e thumb_url, os URLs onde se pode fazer o
  * download do PDF e da imagem do livro. O livro e identificado atraves do
