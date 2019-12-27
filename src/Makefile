@@ -79,7 +79,7 @@ lib: $(OBJ)
 tests: test1 test2 test3
 
 .PHONY: clean-all
-clean-all: clean clean-build clean-tests
+clean-all: clean clean-lib clean-tests
 
 .PHONY: clean
 clean: 
