@@ -1,11 +1,17 @@
 CC = cc
+
+LIB = libbooks.so
+APP = books
+
 CFLAGS = -c -Wall -Werror -Og -g
 LIB_CFLAGS = -fpic
+
 LDFLAGS =
 LIB_LDFLAGS = -shared
+
 DEPS = books.h
 OBJ = books.o http_get_to_file.o http_get_json_data.o
-TEST_OBJ = test_1.o
+TEST_OBJ = test_1.o test_2.o
 
 CURL_CFLAGS != curl-config --cflags
 CURL_LDFLAGS != curl-config --libs
@@ -16,52 +22,65 @@ JSON-C_LDFLAGS != pkg-config --libs json-c
 CFLAGS += $(CURL_CFLAGS) $(JSON-C_CFLAGS)
 LDFLAGS += $(CURL_LDFLAGS) $(JSON-C_LDFLAGS)
 
-TESTDIR = ../tests
+TEST_DIR = ../tests
 BUILD_DIR = ../build
 
 books.o: books.c $(DEPS)
+	@echo "Compiling " $<
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
 http_get_to_file.o: http_get_to_file.c $(DEPS)
+	@echo "Compiling " $<
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
 http_get_json_data.o: http_get_json_data.c $(DEPS)
+	@echo "Compiling " $<
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
 test1: test_1.o $(OBJ)
-	$(CC) -o $(TESTDIR)/$@ $(LDFLAGS) $< $(OBJ)
+	@echo "Linking and create executable " $@
+	$(CC) -o $(TEST_DIR)/$@ $(LDFLAGS) $(OBJ) test_1.o
 
 test_1.o: test_1.c $(DEPS)
+	@echo "Compiling " $<
 	$(CC) $(CFLAGS) -o $@ $<
 
 test2: test_2.o $(OBJ)
-	$(CC) -o $(TESTDIR)/$@ $(LDFLAGS) $< $(OBJ)
+	@echo "Linking and create executable " $@
+	$(CC) -o $(TEST_DIR)/$@ $(LDFLAGS) $(OBJ) test_2.o
 
 test_2.o: test_2.c $(DEPS)
+	@echo "Compiling " $<
 	$(CC) $(CFLAGS) -o $@ $<
 
 .PHONY: all
-all: build-tests
+all: lib tests
 
 .PHONY: lib
 lib: $(OBJ)
-	$(CC) 
+	@echo "Linking and generate libbooks.so"
+	$(CC) $(LIB_LDFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/$(LIB) $(OBJ)  
 
+.PHONY: tests
+tests: test1 test2
+
+.PHONY: clean-all
+clean-all: clean clean-build clean-tests
 
 .PHONY: clean
 clean: 
 	@echo "Cleaning all *.o files"
 	rm $(OBJ)
 
+.PHONY: clean-build
+clean-build:
+	@echo "Cleaning libbooks.so"
+	rm $(BUILD_DIR)/libbooks.so
+
 .PHONY: clean-tests
 clean-tests:
 	@echo "Cleaning tests *.o"
 	rm $(TEST_OBJ)
-	@echo "Cleaning txt files"
-	rm $(TESTDIR)/*.txt
 	@echo "Cleaning tests executable files"
-	rm $(TESTDIR)/*
-
-.PHONY: tests
-tests: test1 test2
+	rm $(TEST_DIR)/*
 
