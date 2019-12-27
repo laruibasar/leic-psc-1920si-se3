@@ -10,7 +10,9 @@ LDFLAGS =
 LIB_LDFLAGS = -shared
 
 DEPS = books.h
-OBJ = books.o http_get_to_file.o http_get_json_data.o
+OBJ = books.o http_get_to_file.o http_get_json_data.o \
+      google_books_search_by_author.o
+
 TEST_OBJ = test_1.o test_2.o
 
 CURL_CFLAGS != curl-config --cflags
@@ -34,6 +36,10 @@ http_get_to_file.o: http_get_to_file.c $(DEPS)
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
 http_get_json_data.o: http_get_json_data.c $(DEPS)
+	@echo "Compiling " $<
+	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
+
+google_books_search_by_author.o: google_books_search_by_author.c $(DEPS)
 	@echo "Compiling " $<
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
@@ -72,8 +78,8 @@ clean:
 	@echo "Cleaning all *.o files"
 	rm $(OBJ)
 
-.PHONY: clean-build
-clean-build:
+.PHONY: clean-lib
+clean-lib:
 	@echo "Cleaning libbooks.so"
 	rm $(BUILD_DIR)/libbooks.so
 
