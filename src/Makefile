@@ -1,6 +1,8 @@
 CC = cc
-CFLAGS =-Wall -Werror -Og -g
+CFLAGS = -c -Wall -Werror -Og -g
+LIB_CFLAGS = -fpic
 LDFLAGS =
+LIB_LDFLAGS = -shared
 DEPS = books.h
 OBJ = books.o http_get_to_file.o http_get_json_data.o
 TEST_OBJ = test_1.o
@@ -18,28 +20,33 @@ TESTDIR = ../tests
 BUILD_DIR = ../build
 
 books.o: books.c $(DEPS)
-	$(CC) -c $(CFLAGS) books.c
+	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
 http_get_to_file.o: http_get_to_file.c $(DEPS)
-	$(CC) -c $(CFLAGS) http_get_to_file.c
+	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
 http_get_json_data.o: http_get_json_data.c $(DEPS)
-	$(CC) -c $(CFLAGS) http_get_json_data.c
+	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
 test1: test_1.o $(OBJ)
-	$(CC) -o $(TESTDIR)/test1 $(LDFLAGS) test_1.o $(OBJ)
+	$(CC) -o $(TESTDIR)/$@ $(LDFLAGS) $< $(OBJ)
 
 test_1.o: test_1.c $(DEPS)
-	$(CC) -c $(CFLAGS) test_1.c
+	$(CC) $(CFLAGS) -o $@ $<
 
 test2: test_2.o $(OBJ)
-	$(CC) -o $(TESTDIR)/test2 $(LDFLAGS) test_2.o $(OBJ)
+	$(CC) -o $(TESTDIR)/$@ $(LDFLAGS) $< $(OBJ)
 
 test_2.o: test_2.c $(DEPS)
-	$(CC) -c $(CFLAGS) test_2.c
+	$(CC) $(CFLAGS) -o $@ $<
 
 .PHONY: all
 all: build-tests
+
+.PHONY: lib
+lib: $(OBJ)
+	$(CC) 
+
 
 .PHONY: clean
 clean: 
@@ -55,6 +62,6 @@ clean-tests:
 	@echo "Cleaning tests executable files"
 	rm $(TESTDIR)/*
 
-.PHONY: build-tests
-build-tests: test1 test2
+.PHONY: tests
+tests: test1 test2
 
