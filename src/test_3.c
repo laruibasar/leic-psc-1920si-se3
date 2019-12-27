@@ -18,11 +18,21 @@ main()
 {
 	init_curl();
 	
+	char *apikey = "AIzaSyAdM5Km30Z3x7I9vvn15akWjLd9lBnwVpU";
+	char *author1 = "Camilo Castelo Branco";
+	char *author2 = "Alexandre Herculano";
+
+	Collection *col = NULL;
+
 	printf("Teste funcao googleBooksSearchByAuthor\n");
 	printf("Teste 1:\n");
-	printf("Envio de uri: https://www.googleapis.com/books/v1/volumes\n");
-	printf("Escrita para ficheiro teste2_t1.txt o resultado json\n");
+	printf("Retorno teste1 nr: %d\n",
+		google_books_search_by_author(apikey, author1, col));
 	
+	printf("Teste 2:\n");
+	printf("Retorno nr: %d\n",
+		google_books_search_by_author(apikey, author2, col));
+
 	close_curl();
 	return 0;
 }
