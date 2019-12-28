@@ -15,13 +15,14 @@ int
 google_books_search_by_author(const char *apikey, const char *author,
 				Collection *res)
 {
-	int books = 0;
+	int books = 0, max_results = 10;
 	char *uri, *encoded_uri;
 	struct json_object *json, *total_items;
 	
 	/* Construir o uri de pesquisa, com base na apikey e author */
-	uri = malloc(URI_MAX_SIZE * sizeof(char));
-	if (uri == NULL) {
+	/* utilizado calloc, mesmo com overhead da inicializacao
+	 */
+	if ((uri = (char *) calloc(URI_MAX_SIZE, sizeof (char))) == NULL) {
 		fprintf(stderr, "Failed to allocate memory\n");
 		return -1;
 	}
@@ -34,9 +35,20 @@ google_books_search_by_author(const char *apikey, const char *author,
 
 	/* encode da string */
 	encoded_uri = string_encode(uri);
+	free(uri);
+
+	if (encoded_uri == NULL)
+		return -1;
 
 	/* executar a pesquisa e guardar o resultado */
 	json = http_get_json_data(encoded_uri);
+	/*
+	 * A melhorar e permitir a possibilidade de reaproveitar a encoded_uri
+	 * para fazer novos pedidos, de modo a receber todos os livros
+	 * resultantes da pesquisa
+	 */
+	free(encoded_uri);
+	
 	if (json == NULL)
 		return -1;
 
@@ -52,14 +64,11 @@ google_books_search_by_author(const char *apikey, const char *author,
 	if (books > 0) {
 		struct json_object* items;
 		if (json_object_object_get_ex(json, "items", &items)) {
-			printf("\nmuitos books\n");
+			printf("\nmuitos books: %d\n", max_results);
+			json_object_to_file("items.txt", items);
 		}
 		free(items);
 	}
-
-	/* magic envolved */
-	free(encoded_uri);
-	free(uri);
 	free(json);
 
 	return books;
@@ -72,7 +81,10 @@ string_encode(char *str)
 	char *pstr = str;
 	
 	/* a nova cadeia e o ponteiro para iterar */
-	char *new = malloc(URI_MAX_SIZE * sizeof(char));
+	char *new;
+	if ((new = (char*) malloc(URI_MAX_SIZE * sizeof(char))) == NULL)
+		return NULL;
+
 	char *pnew = new;
 
 	while (*pstr) {
