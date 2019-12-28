@@ -26,28 +26,26 @@ http_get_json_data(const char *uri)
 	enum json_tokener_error error;
 	struct json_object *json = NULL;
 	struct curl_slist *header = NULL;
-	curl = curl_easy_init();
+	
+	/* aumentara conforme os dados recebidos */
+	if ((res.buffer = (char *) malloc(1)) == NULL) {
+		fprintf(stderr, "Failed to allocate memory\n");
+		return NULL;
+	}
+	/* sem dados atualmente */
+	res.size = 0; 
 
+	curl = curl_easy_init();
 	if (curl == NULL) {
 		fprintf(stderr, "Failed to setup connection");
 		return NULL;
 	}
 
 	header = curl_slist_append(header, "Content-Type: application/json");
-	
-	/* aumentara conforme os dados recebidos */
-	res.buffer = malloc(1); 
-	/* sem dados atualmente */
-	res.size = 0; 
-	if (res.buffer == NULL) {
-		fprintf(stderr, "Failed to allocate memory\n");
-		return NULL;
-	}
-
 	curl_easy_setopt(curl, CURLOPT_URL, uri);
 	/* Define our callback to get called when there's data to be written */
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_buffer);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&res);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &res);
 
 	/* we disable SSL verification for simplicity */
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -58,7 +56,7 @@ http_get_json_data(const char *uri)
 	if (response != CURLE_OK) {
 		fprintf(stderr, "Failed to connect: %s\n",
 			curl_easy_strerror(response));
-		return NULL;
+		json = NULL;
 	} else {
 		/* agora temos a resposta em res com os dados recebidos
 		 * da api e a sua dimensao 
@@ -67,7 +65,7 @@ http_get_json_data(const char *uri)
 		if (error != json_tokener_success) {
 			fprintf(stderr, "Failed to parse JSON: %s\n",
 				json_tokener_error_desc(error));
-			return NULL;
+			json = NULL;
 		}
 	}
 
@@ -85,20 +83,20 @@ write_to_buffer(char *ptr, size_t size, size_t nmemb, void *userdata)
 	/* Cria um ponteiro para os dados atuais
 	 * por receber ou ja recebidos
 	 */
-	struct BufferResponse *mem = (struct BufferResponse *)userdata;
+	struct BufferResponse *mem = (struct BufferResponse *) userdata;
 	
 	/* Define um ponteiro para uma zona de maior espaco que permite alojar
 	 * os dados ja recebidos, e os que vao ser guardados neste novo
 	 * conjunto recebidos.
 	 */
-	char *ch = realloc(mem->buffer, mem->size + realsize + 1);
+	char *ch = (char *) realloc(mem->buffer, mem->size + realsize + 1);
 	if (ch == NULL) {
 		/* Out of memory */
 		fprintf(stderr, "Not enough memory for data received.\n");
 		return 0;
 	}
 
-	/* Afecta o novo espaco no struct e copia o adiciona os dados
+	/* Afecta o novo espaco no struct e copia ou adiciona os dados
 	 * recebidos
 	 */
 	mem->buffer = ch;
