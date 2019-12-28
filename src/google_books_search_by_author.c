@@ -27,11 +27,13 @@ google_books_search_by_author(const char *apikey, const char *author,
 		return -1;
 	}
 
-	strcat(uri, API_URL);
-	strcat(uri, "volumes?q=inauthor:\"");
-	strcat(uri, author);
-	strcat(uri, "\"&key=");
-	strcat(uri, apikey);
+	/* exemplo:
+	 * https://www.googleapis.com/books/v1/volumes
+	 * ?q=inauthor:"author"&key=apikey
+	 */
+	set_query_string(API_URL, apikey, "&", "?q=inauthor:",
+			author, uri);
+	printf("\nURI : %s\n", uri);
 
 	/* encode da string */
 	encoded_uri = string_encode(uri);
@@ -45,7 +47,7 @@ google_books_search_by_author(const char *apikey, const char *author,
 	/*
 	 * A melhorar e permitir a possibilidade de reaproveitar a encoded_uri
 	 * para fazer novos pedidos, de modo a receber todos os livros
-	 * resultantes da pesquisa
+	 * resultantes da pesquisa, o que sugere fazer o free depois.
 	 */
 	free(encoded_uri);
 	
@@ -72,36 +74,4 @@ google_books_search_by_author(const char *apikey, const char *author,
 	free(json);
 
 	return books;
-}
-
-char *
-string_encode(char *str)
-{
-	/* um ponteiro para iterar pela origen */
-	char *pstr = str;
-	
-	/* a nova cadeia e o ponteiro para iterar */
-	char *new;
-	if ((new = (char*) malloc(URI_MAX_SIZE * sizeof(char))) == NULL)
-		return NULL;
-
-	char *pnew = new;
-
-	while (*pstr) {
-		if (*pstr == '"') {
-			*pnew++ = '%';
-			*pnew++ = '2';
-			*pnew++ = '2';
-		} else if (*pstr == ' ') {
-			*pnew++ = '%';
-			*pnew++ = '2';
-			*pnew++ = '0';
-		} else 
-			*pnew++ = *pstr;
-
-		pstr++;
-	}
-	*pnew = '\0';
-
-	return new;
 }

@@ -12,10 +12,16 @@
 #include <json-c/json.h>
 
 /* definicao do uri da api, no futuro carregar de algum ficheiro */
-#define API_URL "https://www.googleapis.com/books/v1/"
+#define API_URL "https://www.googleapis.com/books/v1/volumes"
 
 /* definicao do tamanho maximo para construcao do URI */
 #define URI_MAX_SIZE 256
+
+/* definicao do tamanho maximo para thumbnails */
+#define THUMB_MAX_SIZE 120
+
+/* definicao do tamanho maximo para pdf */
+#define PDF_MAX_SIZE 200
 
 /*
  * Tipo de retorno possivel para utilizacao de URL
@@ -107,6 +113,16 @@ int 	google_books_search_by_author(const char *apikey, const char *author,
 				 Collection *res);
 
 /*
+ * Retorna nos parametros pdf_url e thumb_url, os URLs onde se pode fazer o
+ * download do PDF e da imagem do livro. O livro e identificado atraves do
+ * parametro volumeID.
+ * Retorna um inteiro que indica se e possivel obter os URLs.
+ */
+BOOK_url google_books_get_urls(const char *apikey, const char *volumeId,
+			   char *thumb_url, size_t thumb_maxlen,
+			   char *pdf_url, size_t pdf_maxlen);
+
+/*
  * Faz o encode da string de acordo com as regras definidas:
  * char '"' (aspas) altera para %22
  * char ' ' (espaco) altera para %20
@@ -116,13 +132,19 @@ int 	google_books_search_by_author(const char *apikey, const char *author,
 char*	string_encode(char *str);
 
 /*
- * Retorna nos parametros pdf_url e thumb_url, os URLs onde se pode fazer o
- * download do PDF e da imagem do livro. O livro e identificado atraves do
- * parametro volumeID.
- * Retorna um inteiro que indica se e possivel obter os URLs.
+ * Constroi a string uri para envio (nao faz o encode).
+ * Nao e inteligente e extensa, pelo que temos de definir corretamente
+ * os paramentros:
+ *  param = "?q=inauthor:"
+ *  value = "\"Camilo Castelo Branco\""
+ *  ou
+ *  param = "/"
+ *  value = "volumeID"
+ *
+ * Devolve o tamanho.
  */
-BOOK_url google_books_get_urls(const char *apikey, const char *volumeId,
-			   char *thumb_url, size_t thumb_maxlen,
-			   char *pdf_url, size_t pdf_maxlen);
+size_t	set_query_string(const char *url, const char *apikey,
+		const char *separator, const char *param,
+		const char *value, char *uri);
 
 #endif

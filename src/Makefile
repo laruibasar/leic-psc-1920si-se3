@@ -11,9 +11,9 @@ LIB_LDFLAGS = -shared
 
 DEPS = books.h
 OBJ = books.o http_get_to_file.o http_get_json_data.o \
-      google_books_search_by_author.o
+      google_books_search_by_author.o google_books_get_urls.o
 
-TEST_OBJ = test_1.o test_2.o test_3.o
+TEST_OBJ = test_1.o test_2.o test_3.o test_4.o
 
 CURL_CFLAGS != curl-config --cflags
 CURL_LDFLAGS != curl-config --libs
@@ -43,6 +43,10 @@ google_books_search_by_author.o: google_books_search_by_author.c $(DEPS)
 	@echo "Compiling " $<
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
+google_books_get_urls.o: google_books_get_urls.c $(DEPS)
+	@echo "Compiling " $<
+	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
+
 test1: test_1.o $(OBJ)
 	@echo "Linking and create executable " $@
 	$(CC) -o $(TEST_DIR)/$@ $(LDFLAGS) $(OBJ) test_1.o
@@ -67,6 +71,14 @@ test_3.o: test_3.c $(DEPS)
 	@echo "Compiling " $<
 	$(CC) $(CFLAGS) -o $@ $<
 
+test4: test_4.o $(OBJ)
+	@echo "Linking and create executable " $@
+	$(CC) -o $(TEST_DIR)/$@ $(LDFLAGS) $(OBJ) test_4.o
+
+test_4.o: test_4.c $(DEPS)
+	@echo "Compiling " $<
+	$(CC) $(CFLAGS) -o $@ $<
+
 .PHONY: all
 all: lib tests
 
@@ -76,7 +88,7 @@ lib: $(OBJ)
 	$(CC) $(LIB_LDFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/$(LIB) $(OBJ)  
 
 .PHONY: tests
-tests: test1 test2 test3
+tests: test1 test2 test3 test4
 
 .PHONY: clean-all
 clean-all: clean clean-lib clean-tests
