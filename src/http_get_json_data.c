@@ -38,6 +38,8 @@ http_get_json_data(const char *uri)
 	curl = curl_easy_init();
 	if (curl == NULL) {
 		fprintf(stderr, "Failed to setup connection");
+		free(res.buffer);
+		curl_easy_cleanup(curl);
 		return NULL;
 	}
 
@@ -92,7 +94,8 @@ write_to_buffer(char *ptr, size_t size, size_t nmemb, void *userdata)
 	char *ch = (char *) realloc(mem->buffer, mem->size + realsize + 1);
 	if (ch == NULL) {
 		/* Out of memory */
-		fprintf(stderr, "Not enough memory for data received.\n");
+		fprintf(stderr, "Failed to expand memory for data received.\n");
+		free(mem->buffer);
 		return 0;
 	}
 

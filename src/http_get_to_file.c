@@ -22,6 +22,7 @@ http_get_to_file(const char *uri, const char *filename)
 
 	if (curl == NULL) {
 		printf("Failed to setup connection");
+		curl_easy_cleanup(curl);
 		return 1;
 	}
 
@@ -58,6 +59,6 @@ http_get_to_file(const char *uri, const char *filename)
 size_t
 write_to_file(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	return fwrite(ptr, size, nmemb, (FILE *)userdata);
+	return fwrite(ptr, size, nmemb, (FILE *) userdata);
 }
 
