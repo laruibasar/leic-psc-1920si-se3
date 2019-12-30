@@ -21,17 +21,25 @@ main()
 	char *apikey = "AIzaSyAdM5Km30Z3x7I9vvn15akWjLd9lBnwVpU";
 	char *author1 = "Camilo Castelo Branco";
 	char *author2 = "Alexandre Herculano";
+	char *author3 = "\"Alexandre Herculano\"";
 
-	Collection *col = NULL;
+	Collection col;
 
 	printf("Teste funcao googleBooksSearchByAuthor\n");
 	printf("Teste 1:\n");
 	printf("Retorno teste1 nr: %d\n",
-		google_books_search_by_author(apikey, author1, col));
-	
+		google_books_search_by_author(apikey, author1, &col));
+	printf("Tamanho: %zu\n", col.total);
+
+	Collection col2;
 	printf("Teste 2:\n");
 	printf("Retorno nr: %d\n",
-		google_books_search_by_author(apikey, author2, col));
+		google_books_search_by_author(apikey, author2, &col2));
+
+	Collection col3;
+	printf("Teste 3:\n");
+	printf("Retorno nr: %d\n",
+		google_books_search_by_author(apikey, author3, &col3));
 
 	close_curl();
 	return 0;

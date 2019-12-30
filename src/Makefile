@@ -11,7 +11,8 @@ LIB_LDFLAGS = -shared
 
 DEPS = books.h
 OBJ = books.o http_get_to_file.o http_get_json_data.o \
-      google_books_search_by_author.o google_books_get_urls.o
+      google_books_search_by_author.o google_books_get_urls.o \
+      create_volume.o
 
 TEST_OBJ = test_1.o test_2.o test_3.o test_4.o
 
@@ -44,6 +45,10 @@ google_books_search_by_author.o: google_books_search_by_author.c $(DEPS)
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
 google_books_get_urls.o: google_books_get_urls.c $(DEPS)
+	@echo "Compiling " $<
+	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
+
+create_volume.o: create_volume.c $(DEPS)
 	@echo "Compiling " $<
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 

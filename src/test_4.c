@@ -20,15 +20,22 @@ main()
 	
 	char *apikey = "AIzaSyAdM5Km30Z3x7I9vvn15akWjLd9lBnwVpU";
 	char *volumeID_1 = "G8MaDgAAQBAJ";
-//	char *volumeID_2 = "3gEaDgAAQBAJ";
-	char *thumbs = NULL, *pdf = NULL;
+	char *volumeID_2 = "3gEaDgAAQBAJ";
+	char thumbs[THUMB_MAX_SIZE], pdf[PDF_MAX_SIZE];
 
 	printf("Teste funcao googleBooksGetUrls\n");
 	printf("Teste 1:\n");
-	printf("Retorno teste1 nr: %d\n",
-		google_books_get_urls(apikey, volumeID_1,
-			thumbs, THUMB_MAX_SIZE, pdf, PDF_MAX_SIZE));
-	
+	google_books_get_urls(apikey, volumeID_1,
+		thumbs, THUMB_MAX_SIZE, pdf, PDF_MAX_SIZE);
+	printf("Thumb : %s\n", thumbs);
+	printf("PDF   : %s\n", pdf);
+
+	printf("Teste 2:\n");
+	google_books_get_urls(apikey, volumeID_2,
+			thumbs, THUMB_MAX_SIZE, pdf, PDF_MAX_SIZE);
+	printf("Thumb : %s\n", thumbs);
+	printf("PDF   : %s\n", pdf);
+
 	close_curl();
 	return 0;
 }

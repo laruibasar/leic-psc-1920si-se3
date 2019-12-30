@@ -19,6 +19,7 @@ google_books_get_urls(const char *apikey, const char *volumeId,
 	BOOK_url book_url = URL_NO;
 	char *uri, *encoded_uri;
 	struct json_object *json;
+	Volume vol;
 	
 	/* Construir o uri de pesquisa, com base na apikey e author */
 	/* utilizado calloc, mesmo com overhead da inicializacao
@@ -31,8 +32,7 @@ google_books_get_urls(const char *apikey, const char *volumeId,
 	/* exemplo:
 	 * //https://www.googleapis.com/books/v1/volumes/volumeId&key=apikey
 	 */
-	set_query_string(API_URL, apikey, "?", "/",
-			volumeId, uri);
+	set_query_string(API_URL, apikey, "?", "/", volumeId, uri);
 
 	/* encode da string */
 	encoded_uri = string_encode(uri);
@@ -43,14 +43,17 @@ google_books_get_urls(const char *apikey, const char *volumeId,
 	/* executar a pesquisa e guardar o resultado */
 	json = http_get_json_data(encoded_uri);
 	free(encoded_uri);
-
-	if (json == NULL)
+	if (json == NULL) {
+		json_object_put(json);
 		return 0;
+	}
 
-	json_object_to_file("volumeid.txt", json);
-	free(json);
+	create_volume(json, &vol);
+	json_object_put(json);
 
+	strlcpy(thumb_url, vol.thumbnail, thumb_maxlen);
+	strlcpy(pdf_url, vol.pdf_link, pdf_maxlen);
+	book_url = vol.url_available;
+	
 	return book_url;
 }
-
-

@@ -15,7 +15,7 @@ int
 google_books_search_by_author(const char *apikey, const char *author,
 				Collection *res)
 {
-	int books = 0, max_results = 10;
+	int books = 0;
 	char *uri, *encoded_uri;
 	struct json_object *json, *total_items;
 	
@@ -31,14 +31,11 @@ google_books_search_by_author(const char *apikey, const char *author,
 	 * https://www.googleapis.com/books/v1/volumes
 	 * ?q=inauthor:"author"&key=apikey
 	 */
-	set_query_string(API_URL, apikey, "&", "?q=inauthor:",
-			author, uri);
-	printf("\nURI : %s\n", uri);
+	set_query_string(API_URL, apikey, "&", "?q=inauthor:", author, uri);
 
 	/* encode da string */
 	encoded_uri = string_encode(uri);
 	free(uri);
-
 	if (encoded_uri == NULL)
 		return -1;
 
@@ -50,28 +47,45 @@ google_books_search_by_author(const char *apikey, const char *author,
 	 * resultantes da pesquisa, o que sugere fazer o free depois.
 	 */
 	free(encoded_uri);
-	
-	if (json == NULL)
+	if (json == NULL) {
+		json_object_put(json);
 		return -1;
-
+	}
 	/* 
 	 * afetar o resultado do numero de livros e construir a colecao
 	 * caso esta nao seja vazia
 	 */
 	if (json_object_object_get_ex(json, "totalItems", &total_items)) {
 		books = json_object_get_int64(total_items);
-		free(total_items);
 	}
 
+	/* 
+	 * Como temos livros, tem de percorrer o array de resultados.
+	 */
 	if (books > 0) {
+		Volume *volumes[books];
 		struct json_object* items;
 		if (json_object_object_get_ex(json, "items", &items)) {
-			printf("\nmuitos books: %d\n", max_results);
 			json_object_to_file("items.txt", items);
+
+			size_t length = json_object_array_length(items);
+			for (size_t i = 0; i < length; i++) {
+				struct json_object *item = 
+					json_object_array_get_idx(items, i);
+				Volume vol;
+				create_volume(item, &vol);
+				volumes[i] = &vol;
+			}
+			/* 
+			 * Afetamos a collection com os valores to tamanho
+			 * e o apontador para o endereco do array de ponteiros
+			 * dos volumes
+			 */
+			res->total = length;
+			res->volumes = (Volume *) volumes; 
 		}
-		free(items);
 	}
-	free(json);
+	json_object_put(json);
 
 	return books;
 }

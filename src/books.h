@@ -38,11 +38,16 @@ typedef enum {
  * obtidos do servico Books API.
  */
 typedef struct volume {
-	char *identifier;
+	char *volume_id;
 	char *title;
-	char *ISBN;
+	char **author;
+	size_t total_authors;
 	char *publish_date;
-	int pdf_available;
+	char *isbn;
+	char *thumbnail;
+	char *pdf_link;
+	int number_isbn;
+	BOOK_url url_available;
 } Volume;
 
 /*
@@ -147,4 +152,13 @@ size_t	set_query_string(const char *url, const char *apikey,
 		const char *separator, const char *param,
 		const char *value, char *uri);
 
+/*
+ * Constroi toda a informacao necessaria para o livro (volume)
+ */
+void	create_volume(json_object *info, Volume *vol);
+
+/* 
+ * Prepara as strings dos objectos json que sao enviados.
+ */
+char*	json_to_string(const char *src, size_t size);
 #endif
