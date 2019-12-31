@@ -8,6 +8,7 @@ LIB_CFLAGS = -fpic
 
 LDFLAGS =
 LIB_LDFLAGS = -shared
+APP_LDFLAGS = -rdynamic
 
 DEPS = books.h
 OBJ = books.o http_get_to_file.o http_get_json_data.o \
@@ -99,7 +100,7 @@ clean_volume.o: clean_volume.c $(DEPS)
 
 gbooks: gbooks.o $(OBJ)
 	@echo "Linking and create executable " $@
-	$(CC) -o $(BUILD_DIR)/$@ -L$(BUILD_DIR) -lbooks gbooks.o
+	$(CC) $(APP_LDFLAGS) -o $(BUILD_DIR)/$@ gbooks.o 
 
 gbooks.o: gbooks.c $(DEPS)
 	@echo "Compiling " $<
