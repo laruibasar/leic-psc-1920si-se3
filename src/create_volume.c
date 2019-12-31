@@ -16,7 +16,6 @@ create_volume(json_object *info, Volume *vol)
 {
 	char *volume_id = NULL,
 	     *title = NULL,
-	     **author= NULL,
 	     *publish_date = NULL,
 	     *isbn = NULL,
 	     *thumbnail = NULL,
@@ -46,14 +45,19 @@ create_volume(json_object *info, Volume *vol)
 		if (json_object_object_get_ex(volume_info,
 				"authors", &js_author)) {
 			size_t length = json_object_array_length(js_author);
+			char *author[length];
 			for (size_t i = 0; i < length; i++) {
 				struct json_object *js_authors = 
 					json_object_array_get_idx(js_author, i);
-				char *str = (char *) json_object_get_string(js_authors);
+				char *str = json_to_string(
+						json_object_get_string(js_authors),
+						json_object_get_string_len(js_authors));
 				author[i] = str;
 			}
 			total_authors = length;
-		} 
+			vol->author = author;
+		} else 
+			vol->author = NULL;
 
 		if (json_object_object_get_ex(volume_info,
 				"publishedDate", &js_publish_date)) {
@@ -87,7 +91,8 @@ create_volume(json_object *info, Volume *vol)
 								&js_isbn_nr);
 						number_isbn = 
 							json_object_get_int(js_isbn_nr);
-					}
+					} else
+						isbn = "OTHER";
 				}
 			}
 		}
@@ -110,7 +115,6 @@ create_volume(json_object *info, Volume *vol)
 		}
 	}
 	vol->title = title;
-	vol->author = author;
 	vol->total_authors = total_authors;
 	vol->publish_date = publish_date;
 	vol->isbn = isbn;

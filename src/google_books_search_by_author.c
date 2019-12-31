@@ -84,8 +84,19 @@ google_books_search_by_author(const char *apikey, const char *author,
 			res->total = length;
 			res->volumes = (Volume *) volumes; 
 		}
+		printf("\n\tVolume: %s\n", volumes[0]->volume_id); 
+		printf("Titulo: %s\n", volumes[0]->title);
+		printf("Autor(es): "); 
+		for (int i = 0; i < volumes[0]->total_authors; i++) {
+			char *str = volumes[0]->author[i];
+			printf("%p ", str);
+		}
+		printf("\nData publicacao: %s\n", volumes[0]->publish_date);
+		printf("%s : %d\n", volumes[0]->isbn, volumes[0]->number_isbn);
+		printf("Thumbnail: %s\n", volumes[0]->thumbnail);
+		printf("PDF: %s\n", volumes[0]->pdf_link);
 	}
-	json_object_put(json);
+json_object_put(json);
 
 	return books;
 }

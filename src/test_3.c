@@ -13,6 +13,8 @@
 
 #include "books.h"
 
+void	print_volume(Volume *volume);
+
 int
 main()
 {
@@ -30,6 +32,10 @@ main()
 	printf("Retorno teste1 nr: %d\n",
 		google_books_search_by_author(apikey, author1, &col));
 	printf("Tamanho: %zu\n", col.total);
+	Volume *vol = col.volumes;
+	//for (int i = 0; i < col.total; i++) {
+		print_volume(vol);
+	//}
 
 	Collection col2;
 	printf("Teste 2:\n");
@@ -43,4 +49,19 @@ main()
 
 	close_curl();
 	return 0;
+}
+
+void
+print_volume(Volume *volume)
+{
+	printf("\n\tVolume: %s\n", volume->volume_id); 
+	printf("Titulo: %s\n", volume->title);
+	printf("Autor(es): "); 
+	for (int i = 0; i < volume->total_authors; i++) 
+		printf("%s ", volume->author[i]);
+
+	printf("\nData publicacao: %s\n", volume->publish_date);
+	printf("%s : %d\n", volume->isbn, volume->number_isbn);
+	printf("Thumbnail: %s\n", volume->thumbnail);
+	printf("PDF: %s\n", volume->pdf_link);
 }

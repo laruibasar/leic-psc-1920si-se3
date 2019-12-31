@@ -157,8 +157,24 @@ size_t	set_query_string(const char *url, const char *apikey,
  */
 void	create_volume(json_object *info, Volume *vol);
 
+/*
+ * Elimina com seguranca a memoria definida para o livro (volume)
+ * fazendo a chamada a free_elem para todos os elementos
+ */
+void	clean_volume(Volume *vol);
+
 /* 
  * Prepara as strings dos objectos json que sao enviados.
+ * Nota que devemos libertar estes recursos apos nao serem
+ * mais necessarios.
+ *
+ * Devolve uma cadeia de texto.
  */
 char*	json_to_string(const char *src, size_t size);
+
+/*
+ * Liberta os elementos de memoria, serve para fazer testes primeiros
+ * para nao dar erros.
+ */
+void	free_elem(void *elem);
 #endif

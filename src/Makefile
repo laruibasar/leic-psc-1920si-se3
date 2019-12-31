@@ -12,7 +12,7 @@ LIB_LDFLAGS = -shared
 DEPS = books.h
 OBJ = books.o http_get_to_file.o http_get_json_data.o \
       google_books_search_by_author.o google_books_get_urls.o \
-      create_volume.o
+      create_volume.o clean_volume.o
 
 TEST_OBJ = test_1.o test_2.o test_3.o test_4.o
 
@@ -27,6 +27,47 @@ LDFLAGS += $(CURL_LDFLAGS) $(JSON-C_LDFLAGS)
 
 TEST_DIR = ../tests
 BUILD_DIR = ../build
+
+.PHONY: all
+all: lib app tests
+
+.PHONY: lib
+lib: $(OBJ)
+	@echo "Linking and generate libbooks.so"
+	$(CC) $(LIB_LDFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/$(LIB) $(OBJ)  
+
+.PHONY: app
+app:	lib gbooks
+
+.PHONY: tests
+tests: test1 test2 test3 test4
+
+.PHONY: clean-all
+clean-all: clean clean-tests
+
+.PHONY: clean
+clean: clean-lib clean-app
+	@echo "Cleaning all *.o files"
+	rm $(OBJ)
+
+.PHONY: clean-lib
+clean-lib:
+	@echo "Cleaning libbooks.so"
+	rm $(BUILD_DIR)/libbooks.so
+
+.PHONY: clean-app
+clean-app:
+	@echo "Removing gbooks.o"
+	rm gbooks.o
+	@echo "Removing app gbooks"
+	rm $(BUILD_DIR)/gbooks
+
+.PHONY: clean-tests
+clean-tests:
+	@echo "Cleaning tests *.o"
+	rm $(TEST_OBJ)
+	@echo "Cleaning tests executable files"
+	rm $(TEST_DIR)/*
 
 books.o: books.c $(DEPS)
 	@echo "Compiling " $<
@@ -51,6 +92,18 @@ google_books_get_urls.o: google_books_get_urls.c $(DEPS)
 create_volume.o: create_volume.c $(DEPS)
 	@echo "Compiling " $<
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
+
+clean_volume.o: clean_volume.c $(DEPS)
+	@echo "Compiling " $<
+	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
+
+gbooks: gbooks.o $(OBJ)
+	@echo "Linking and create executable " $@
+	$(CC) -o $(BUILD_DIR)/$@ -L$(BUILD_DIR) -lbooks gbooks.o
+
+gbooks.o: gbooks.c $(DEPS)
+	@echo "Compiling " $<
+	$(CC) $(CFLAGS) -o $@ $<
 
 test1: test_1.o $(OBJ)
 	@echo "Linking and create executable " $@
@@ -83,35 +136,4 @@ test4: test_4.o $(OBJ)
 test_4.o: test_4.c $(DEPS)
 	@echo "Compiling " $<
 	$(CC) $(CFLAGS) -o $@ $<
-
-.PHONY: all
-all: lib tests
-
-.PHONY: lib
-lib: $(OBJ)
-	@echo "Linking and generate libbooks.so"
-	$(CC) $(LIB_LDFLAGS) $(LDFLAGS) -o $(BUILD_DIR)/$(LIB) $(OBJ)  
-
-.PHONY: tests
-tests: test1 test2 test3 test4
-
-.PHONY: clean-all
-clean-all: clean clean-lib clean-tests
-
-.PHONY: clean
-clean: 
-	@echo "Cleaning all *.o files"
-	rm $(OBJ)
-
-.PHONY: clean-lib
-clean-lib:
-	@echo "Cleaning libbooks.so"
-	rm $(BUILD_DIR)/libbooks.so
-
-.PHONY: clean-tests
-clean-tests:
-	@echo "Cleaning tests *.o"
-	rm $(TEST_OBJ)
-	@echo "Cleaning tests executable files"
-	rm $(TEST_DIR)/*
 

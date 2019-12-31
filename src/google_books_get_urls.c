@@ -54,6 +54,8 @@ google_books_get_urls(const char *apikey, const char *volumeId,
 	strlcpy(thumb_url, vol.thumbnail, thumb_maxlen);
 	strlcpy(pdf_url, vol.pdf_link, pdf_maxlen);
 	book_url = vol.url_available;
+
+	clean_volume(&vol);
 	
 	return book_url;
 }
