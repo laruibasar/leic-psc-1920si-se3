@@ -11,7 +11,7 @@ LIB_LDFLAGS = -shared
 APP_LDFLAGS = -rdynamic
 
 DEPS = books.h
-OBJ = books.o http_get_to_file.o http_get_json_data.o \
+OBJ = utils.o http_get_to_file.o http_get_json_data.o \
       google_books_search_by_author.o google_books_get_urls.o \
       create_volume.o clean_volume.o
 
@@ -70,7 +70,7 @@ clean-tests:
 	@echo "Cleaning tests executable files"
 	rm $(TEST_DIR)/*
 
-books.o: books.c $(DEPS)
+utils.o: utils.c $(DEPS)
 	@echo "Compiling " $<
 	$(CC) $(CFLAGS) $(LIB_CFLAGS) -o $@ $<
 
