@@ -63,7 +63,9 @@ google_books_search_by_author(const char *apikey, const char *author,
 	 * Como temos livros, tem de percorrer o array de resultados.
 	 */
 	if (books > 0) {
-		Volume *volumes[books];
+		/*
+		Volume volumes[books];
+		res->volumes = malloc(sizeof (Volume) * books);		
 		struct json_object* items;
 		if (json_object_object_get_ex(json, "items", &items)) {
 			json_object_to_file("items.txt", items);
@@ -74,29 +76,21 @@ google_books_search_by_author(const char *apikey, const char *author,
 					json_object_array_get_idx(items, i);
 				Volume vol;
 				create_volume(item, &vol);
-				volumes[i] = &vol;
+				volumes[i] = vol;
 			}
+			*/
 			/* 
 			 * Afetamos a collection com os valores to tamanho
 			 * e o apontador para o endereco do array de ponteiros
 			 * dos volumes
 			 */
+		/*
 			res->total = length;
 			res->volumes = (Volume *) volumes; 
 		}
-		printf("\n\tVolume: %s\n", volumes[0]->volume_id); 
-		printf("Titulo: %s\n", volumes[0]->title);
-		printf("Autor(es): "); 
-		for (int i = 0; i < volumes[0]->total_authors; i++) {
-			char *str = volumes[0]->author[i];
-			printf("%p ", str);
-		}
-		printf("\nData publicacao: %s\n", volumes[0]->publish_date);
-		printf("%s : %d\n", volumes[0]->isbn, volumes[0]->number_isbn);
-		printf("Thumbnail: %s\n", volumes[0]->thumbnail);
-		printf("PDF: %s\n", volumes[0]->pdf_link);
+		*/
 	}
-json_object_put(json);
+	json_object_put(json);
 
 	return books;
 }

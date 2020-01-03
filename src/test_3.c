@@ -25,7 +25,7 @@ main()
 	char *author2 = "Alexandre Herculano";
 	char *author3 = "\"Alexandre Herculano\"";
 
-	Collection col;
+	Collection col = {.total = 0; .volumes = NULL};
 
 	printf("Teste funcao googleBooksSearchByAuthor\n");
 	printf("Teste 1:\n");

@@ -30,7 +30,7 @@ google_books_get_urls(const char *apikey, const char *volumeId,
 	}
 	
 	/* exemplo:
-	 * //https://www.googleapis.com/books/v1/volumes/volumeId&key=apikey
+	 * https://www.googleapis.com/books/v1/volumes/volumeId&key=apikey
 	 */
 	set_query_string(API_URL, apikey, "?", "/", volumeId, uri);
 
@@ -38,21 +38,21 @@ google_books_get_urls(const char *apikey, const char *volumeId,
 	encoded_uri = string_encode(uri);
 	free(uri);
 	if (encoded_uri == NULL)
-		return 0;
+		return URL_NO;
 
 	/* executar a pesquisa e guardar o resultado */
 	json = http_get_json_data(encoded_uri);
 	free(encoded_uri);
 	if (json == NULL) {
 		json_object_put(json);
-		return 0;
+		return URL_NO;
 	}
 
 	create_volume(json, &vol);
 	json_object_put(json);
 
-	strlcpy(thumb_url, vol.thumbnail, thumb_maxlen);
-	strlcpy(pdf_url, vol.pdf_link, pdf_maxlen);
+	strncpy(thumb_url, vol.thumbnail, thumb_maxlen);
+	strncpy(pdf_url, vol.pdf_link, pdf_maxlen);
 	book_url = vol.url_available;
 
 	clean_volume(&vol);

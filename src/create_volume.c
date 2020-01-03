@@ -27,41 +27,53 @@ create_volume(json_object *info, Volume *vol)
 	struct json_object *id, *volume_info, *access_info;
 
 	if (json_object_object_get_ex(info, "id", &id)) {
-		volume_id = json_to_string(json_object_get_string(id),
-					json_object_get_string_len(id));
+		json_strncpy(&volume_id, json_object_get_string(id),
+				json_object_get_string_len(id));
 	}
 	vol->volume_id = volume_id;
 
 	if (json_object_object_get_ex(info, "volumeInfo", &volume_info)) {
-		struct json_object *js_title, *js_author, *js_publish_date,
-			*js_industry, *js_image;
-		if (json_object_object_get_ex(volume_info,
-				"title", &js_title)) {
-			title = json_to_string(
-					json_object_get_string(js_title),
-					json_object_get_string_len(js_title));
+		struct json_object *js_title,
+				   *js_authors,
+				   *js_publish_date,
+				   *js_industry,
+				   *js_image;
+
+		if (json_object_object_get_ex(volume_info, "title",
+					&js_title)) {
+			json_strncpy(&title,
+				json_object_get_string(js_title),
+				json_object_get_string_len(js_title));
 		}
 		
-		if (json_object_object_get_ex(volume_info,
-				"authors", &js_author)) {
-			size_t length = json_object_array_length(js_author);
-			char *author[length];
-			for (size_t i = 0; i < length; i++) {
-				struct json_object *js_authors = 
-					json_object_array_get_idx(js_author, i);
-				char *str = json_to_string(
-						json_object_get_string(js_authors),
-						json_object_get_string_len(js_authors));
-				author[i] = str;
+		if (json_object_object_get_ex(volume_info, "authors",
+					&js_authors)) {
+			size_t length = json_object_array_length(js_authors);
+			char *author;
+			if ((author = malloc(sizeof (char) * length)) == NULL) {
+				fprintf(stderr,
+					"Failed to allocate space to string\n");
+				author = NULL;
 			}
+
+			for (size_t i = 0; i < length; i++) {
+				struct json_object *js_author = 
+					json_object_array_get_idx(js_authors, i);
+				char *str;
+				json_strncpy(&str, 
+					json_object_get_string(js_author),
+					json_object_get_string_len(js_author));
+				author[i] = *str;
+			}
+
 			total_authors = length;
-			vol->author = author;
+			vol->author = &author;
 		} else 
 			vol->author = NULL;
 
 		if (json_object_object_get_ex(volume_info,
 				"publishedDate", &js_publish_date)) {
-			publish_date = json_to_string(
+			json_strncpy(&publish_date,
 				json_object_get_string(js_publish_date),
 				json_object_get_string_len(js_publish_date));
 		}
@@ -82,8 +94,8 @@ create_volume(json_object *info, Volume *vol)
 						json_object_get_string(js_isbn_type);
 					
 					if (strstr(type, "ISBN") != NULL) {
-						isbn = json_to_string(type,
-								json_object_get_string_len(js_isbn_type));
+						json_strncpy(&isbn, type,
+							json_object_get_string_len(js_isbn_type));
 						
 						json_object_object_get_ex(
 								js_isbn,
@@ -97,19 +109,17 @@ create_volume(json_object *info, Volume *vol)
 			}
 		}
 		
-		if (json_object_object_get_ex(volume_info,
-				"imageLinks", &js_image)) {
+		if (json_object_object_get_ex(volume_info, "imageLinks",
+					&js_image)) {
 			struct json_object *js_thumbnail;
-			if (json_object_object_get_ex(
-					js_image, 
-					"thumbnail",
+
+			if (json_object_object_get_ex(js_image, "thumbnail",
 					&js_thumbnail)) {
-				int len = json_object_get_string_len(js_thumbnail);
-				thumbnail = json_to_string(
-						json_object_get_string(js_thumbnail),
-						(len > THUMB_MAX_SIZE)
-							? THUMB_MAX_SIZE
-							: len);
+				size_t length = json_object_get_string_len(js_thumbnail);
+				length = (length < THUMB_MAX_SIZE) ? length : THUMB_MAX_SIZE;
+				json_strncpy(&thumbnail,
+					json_object_get_string(js_thumbnail),
+					length);
 				urls = URL_THUMB;
 			}
 		}
@@ -123,22 +133,18 @@ create_volume(json_object *info, Volume *vol)
 	
 	if (json_object_object_get_ex(info, "accessInfo", &access_info)) {
 		struct json_object *js_pdf;
+
 		if (json_object_object_get_ex(access_info, "pdf", &js_pdf)) {
 			struct json_object *js_link;
-			if (json_object_object_get_ex(
-					js_pdf,
-					"downloadLink",
+			if (json_object_object_get_ex(js_pdf, "downloadLink",
 					&js_link)
-			|| json_object_object_get_ex(
-						js_pdf,
-						"acsTokenLink",
+			|| json_object_object_get_ex(js_pdf,"acsTokenLink",
 						&js_link)) {
-				int len = json_object_get_string_len(js_link);
-				pdf_link = json_to_string(
-						json_object_get_string(js_link),
-						(len > PDF_MAX_SIZE)
-							? PDF_MAX_SIZE
-							: len);
+				size_t length = json_object_get_string_len(js_link);
+				length = (length < PDF_MAX_SIZE) ? length : PDF_MAX_SIZE;
+				json_strncpy(&pdf_link, 
+					json_object_get_string(js_link),
+					length);
 				urls += URL_PDF;
 			}
 		}
@@ -147,14 +153,15 @@ create_volume(json_object *info, Volume *vol)
 	vol->url_available = urls;
 }
 
-char *
-json_to_string(const char *src, size_t size)
+size_t
+json_strncpy(char **dst, const char *src, size_t length)
 {
 	char *str;
-	if ((str = calloc(size + 1, sizeof (char))) == NULL) {
-		fprintf(stderr, "Failed to allocate space for string");
-		return (NULL);
+	if ((str = malloc(sizeof (char) * (length + 1))) == NULL) {
+		fprintf(stderr, "Failed to allocate space to string");
+		return 0;
 	}
-	strlcpy(str, src, size + 1);
-	return str;
+	strncpy(str, src, length + 1);
+	*dst = str;
+	return length + 1;
 }

@@ -163,14 +163,13 @@ void	create_volume(json_object *info, Volume *vol);
  */
 void	clean_volume(Volume *vol);
 
-/* 
- * Prepara as strings dos objectos json que sao enviados.
- * Nota que devemos libertar estes recursos apos nao serem
- * mais necessarios.
+/*
+ * Copia as strings geradas dos objectos json recebidos.
+ * Devemos libertar estes recursos apos nao serem mais necessarios.
  *
- * Devolve uma cadeia de texto.
+ * Devolve o tamanho da string e afeta o valor copiado no parametro dst.
  */
-char*	json_to_string(const char *src, size_t size);
+size_t	json_strncpy(char **dst, const char *src, size_t length);
 
 /*
  * Liberta os elementos de memoria, serve para fazer testes primeiros
