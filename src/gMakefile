@@ -16,11 +16,11 @@ OBJ = utils.o http_get_to_file.o http_get_json_data.o \
 
 TEST_OBJ = test_1.o test_2.o test_3.o test_4.o
 
-CURL_CFLAGS != curl-config --cflags
-CURL_LDFLAGS != curl-config --libs
+CURL_CFLAGS = $(shell pkg-config --cflags libcurl)
+CURL_LDFLAGS = $(shell pkg-config --libs libcurl)
 
-JSON-C_CFLAGS != pkg-config --cflags json-c
-JSON-C_LDFLAGS != pkg-config --libs json-c
+JSON-C_CFLAGS = $(shell pkg-config --cflags json-c)
+JSON-C_LDFLAGS = $(shell pkg-config --libs json-c)
 
 CFLAGS += $(CURL_CFLAGS) $(JSON-C_CFLAGS)
 LDFLAGS += $(CURL_LDFLAGS) $(JSON-C_LDFLAGS)
