@@ -8,7 +8,6 @@ LIB_CFLAGS = -fpic
 
 LDFLAGS =
 LIB_LDFLAGS = -shared
-APP_LDFLAGS = -rdynamic
 
 DEPS = books.h
 OBJ = utils.o http_get_to_file.o http_get_json_data.o \
@@ -28,6 +27,7 @@ LDFLAGS += $(CURL_LDFLAGS) $(JSON-C_LDFLAGS)
 
 TEST_DIR = ../tests
 BUILD_DIR = ../build
+APP_LDFLAGS = -L$(BUILD_DIR) -lbooks
 
 .PHONY: all
 all: lib app tests

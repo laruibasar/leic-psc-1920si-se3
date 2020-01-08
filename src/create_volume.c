@@ -49,7 +49,7 @@ create_volume(json_object *info, Volume *vol)
 		if (json_object_object_get_ex(volume_info, "authors",
 					&js_authors)) {
 			size_t length = json_object_array_length(js_authors);
-			char *author;
+			char **author = NULL;
 			if ((author = malloc(sizeof (char) * length)) == NULL) {
 				fprintf(stderr,
 					"Failed to allocate space to string\n");
@@ -59,15 +59,15 @@ create_volume(json_object *info, Volume *vol)
 			for (size_t i = 0; i < length; i++) {
 				struct json_object *js_author = 
 					json_object_array_get_idx(js_authors, i);
-				char *str;
+				char *str = NULL;
 				json_strncpy(&str, 
 					json_object_get_string(js_author),
 					json_object_get_string_len(js_author));
-				author[i] = *str;
+				author[i] = str;
 			}
 
 			total_authors = length;
-			vol->author = &author;
+			vol->author = author;
 		} else 
 			vol->author = NULL;
 
