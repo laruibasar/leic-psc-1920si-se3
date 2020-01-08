@@ -136,17 +136,19 @@ void
 set_html_body_total(FILE *fp, int total)
 {
 	fprintf(fp, "<table>\n");
-	fprintf(fp, "<tbody>\n");
+	fprintf(fp, "<thead>\n");
 	fprintf(fp, "<tr><td colspan=2>\n");
 	fprintf(fp, "Total: %d (So apresenta max 10)\n", total);
 	fprintf(fp, "</td></tr>\n");
+	fprintf(fp, "</thead><tbody>\n");
+
 }
 
 void
 set_html_body_volume(FILE *fp, Volume *volume)
 {
 	if (volume->thumbnail != NULL)
-		fprintf(fp, "<tr><td rowspan=\"6\">%s</td><td></td></tr>",
+		fprintf(fp, "<tr><td rowspan=\"6\"><img src=\"%s\"></td></tr>",
 				volume->thumbnail);
 
 	fprintf(fp, "<tr><td>Id: %s</td></tr>", volume->volume_id);
@@ -161,9 +163,9 @@ set_html_body_volume(FILE *fp, Volume *volume)
 
 	if (volume->url_available == URL_PDF ||
 	    volume->url_available == URL_ALL)
-		fprintf(fp, "<tr><td>PDF: %s</td></tr>", volume->pdf_link);
-
-	fprintf(fp, "</table>");
+		fprintf(fp, "<tr><td>PDF: <a href=\"%s\">Link PDF</a></td></tr>", volume->pdf_link);
+	else
+		fprintf(fp, "<tr><td>PDF: sem link disponivel</td></tr>");
 }
 
 void

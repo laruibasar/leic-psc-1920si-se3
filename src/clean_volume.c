@@ -17,7 +17,7 @@ clean_volume(Volume *vol)
 	free_elem(vol->publish_date);
 	for (int i = 0; i < vol->total_authors; i++) {
 		char *ptr = vol->author[i];
-		free(&ptr);
+		free(ptr);
 	}
 	free_elem(vol->title);
 	free_elem(vol->volume_id);
